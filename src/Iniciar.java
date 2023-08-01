@@ -9,6 +9,7 @@ public class Iniciar {
     private JPanel Inicio;
     private JButton iniciarSesionButton;
     private JButton DELETEButton;
+    private JButton insertarButton;
     static final String DB_URL = "jdbc:mysql://localhost/EJERCICIO";
     static final String USER = "root";
     static final String PASS = "root_bas3";
@@ -80,7 +81,39 @@ public class Iniciar {
                     JOptionPane.showMessageDialog(Inicio, "Error al intentar conectarse a la base de datos.",
                             "Error de conexión", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+        });
+        insertarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nuevoID = "123";
+                String nuevaNombre = "Danny Yanacallo ";
+                String nuevaedad = "20";
+                String nuevaCedula = "17555042213";
+                String nuevaContraseña = "DNN";
+                String nuevaCiudad = "Quito";
 
+                try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                     PreparedStatement stmt = conn.prepareStatement("INSERT INTO estudiantes1 (id, nombre, edad, ciudad, cedula, contraseña) VALUES (?, ?, ?, ?, ?, ?)")) {
+
+                    stmt.setString(1, nuevoID);
+                    stmt.setString(2, nuevaNombre);
+                    stmt.setString(3, nuevaedad);
+                    stmt.setString(4, nuevaCiudad);
+                    stmt.setString(5, nuevaCedula);
+                    stmt.setString(6, nuevaContraseña);
+
+                    int rowsAffected = stmt.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        System.out.println("Nuevo usuario registrado exitosamente.");
+                    } else {
+                        System.out.println("Error al registrar el nuevo usuario.");
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    System.out.println("Error al intentar conectarse a la base de datos.");
+                }
             }
         });
     }
