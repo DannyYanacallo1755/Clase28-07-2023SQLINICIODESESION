@@ -8,6 +8,7 @@ public class Iniciar {
     private JPasswordField passwordField1;
     private JPanel Inicio;
     private JButton iniciarSesionButton;
+    private JButton DELETEButton;
     static final String DB_URL = "jdbc:mysql://localhost/EJERCICIO";
     static final String USER = "root";
     static final String PASS = "root_bas3";
@@ -20,18 +21,14 @@ public class Iniciar {
                 String usuario = textField1.getText();
                 String contraseña = new String(passwordField1.getPassword());
 
-                // Intentamos establecer la conexión con la base de datos.
                 try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
                      PreparedStatement stmt = conn.prepareStatement(QUERY)) {
 
                     // Establecemos los parámetros de la consulta.
                     stmt.setString(1, usuario);
                     stmt.setString(2, contraseña);
-
-                    // Ejecutamos la consulta.
                     ResultSet rs = stmt.executeQuery();
 
-                    // Verificamos si hay resultados.
                     if (rs.next()) {
                         String nombre = rs.getString("nombre");
                         String cedula = rs.getString("cedula");
@@ -44,15 +41,46 @@ public class Iniciar {
 
 
                         JOptionPane.showMessageDialog(Inicio, "Inicio de sesión exitoso.");
+
                     } else {
                         JOptionPane.showMessageDialog(Inicio, "Credenciales incorrectas. Inténtalo de nuevo.",
                                 "Error de inicio de sesión", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
+                } catch (SQLException sq) {
+                    sq.printStackTrace();
                     JOptionPane.showMessageDialog(Inicio, "Error al intentar conectarse a la base de datos.",
                             "Error de conexión", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+        });
+        DELETEButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String usuario = textField1.getText();
+                String contraseña = new String(passwordField1.getPassword());
+
+                try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                     PreparedStatement stmt = conn.prepareStatement("DELETE FROM estudiantes1 WHERE nombre=? AND contraseña=?")) {
+
+
+                    stmt.setString(1, usuario);
+                    stmt.setString(2, contraseña);
+
+                    int BUSCAR = stmt.executeUpdate();
+
+                    // Verificamos si algún usuario fue eliminado.
+                    if (BUSCAR > 0) {
+                        JOptionPane.showMessageDialog(Inicio, "Usuario eliminado exitosamente.");
+                        textField1.setText("");
+                        passwordField1.setText("");
+                    }
+
+                } catch (SQLException sq) {
+                    sq.printStackTrace();
+                    JOptionPane.showMessageDialog(Inicio, "Error al intentar conectarse a la base de datos.",
+                            "Error de conexión", JOptionPane.ERROR_MESSAGE);
+                }
+
             }
         });
     }
