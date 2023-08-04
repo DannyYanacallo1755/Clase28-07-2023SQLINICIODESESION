@@ -1,0 +1,163 @@
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+
+public class EstudiantesCRUDGUI {
+    private JTextField nombreField;
+    private JTextField cedulaField;
+    private JTextField ciudadField;
+    private JTextField contraseñaField;
+    private JButton insertButton;
+    private JButton updateButton;
+    private JButton deleteButton;
+    private JTextArea resultTextArea;
+    private JPanel mainPanel;
+
+    static final String DB_URL = "jdbc:mysql://localhost/EJERCICIO";
+    static final String USER = "root";
+    static final String PASS = "root_bas3";
+
+    public EstudiantesCRUDGUI() {
+        insertButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = nombreField.getText();
+                String cedula = cedulaField.getText();
+                String ciudad = ciudadField.getText();
+                String contraseña = contraseñaField.getText();
+
+                insertEstudiante(nombre, cedula, ciudad, contraseña);
+                readEstudiantes();
+            }
+        });
+
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = nombreField.getText();
+                String nuevaCedula = cedulaField.getText();
+                String nuevaCiudad = ciudadField.getText();
+                String nuevaContraseña = contraseñaField.getText();
+
+                updateEstudiante(nombre, nuevaCedula, nuevaCiudad, nuevaContraseña);
+                readEstudiantes();
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = nombreField.getText();
+
+                deleteEstudiante(nombre);
+                readEstudiantes();
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Estudiantes CRUD");
+        frame.setContentPane(new EstudiantesCRUDGUI().mainPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    // Create - Insert
+    public void insertEstudiante(String nombre, String cedula, String ciudad, String contraseña) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO estudiantes (nombre, cedula, ciudad, contraseña) VALUES (?, ?, ?, ?)")) {
+
+            stmt.setString(1, nombre);
+            stmt.setString(2, cedula);
+            stmt.setString(3, ciudad);
+            stmt.setString(4, contraseña);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(mainPanel, "Estudiante insertado correctamente.");
+            } else {
+                JOptionPane.showMessageDialog(mainPanel, "Error al insertar estudiante.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel, "Error al intentar conectarse a la base de datos.",
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Read - Select
+    public void readEstudiantes() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM estudiantes")) {
+
+            StringBuilder result = new StringBuilder();
+
+            while (rs.next()) {
+                String nombre = rs.getString("nombre");
+                String cedula = rs.getString("cedula");
+                String ciudad = rs.getString("ciudad");
+                String contraseña = rs.getString("contraseña");
+
+                result.append("Nombre: ").append(nombre).append(", Cédula: ").append(cedula).append(", Ciudad: ").append(ciudad).append(", Contraseña: ").append(contraseña).append("\n");
+            }
+
+            resultTextArea.setText(result.toString());
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel, "Error al intentar conectarse a la base de datos.",
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Update
+    public void updateEstudiante(String nombre, String nuevaCedula, String nuevaCiudad, String nuevaContraseña) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement("UPDATE estudiantes SET cedula=?, ciudad=?, contraseña=? WHERE nombre=?")) {
+
+            stmt.setString(1, nuevaCedula);
+            stmt.setString(2, nuevaCiudad);
+            stmt.setString(3, nuevaContraseña);
+            stmt.setString(4, nombre);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(mainPanel, "Estudiante actualizado correctamente.");
+            } else {
+                JOptionPane.showMessageDialog(mainPanel, "Error al actualizar estudiante.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel, "Error al intentar conectarse a la base de datos.",
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Delete
+    public void deleteEstudiante(String nombre) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM estudiantes WHERE nombre=?")) {
+
+            stmt.setString(1, nombre);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(mainPanel, "Estudiante eliminado correctamente.");
+            } else {
+                JOptionPane.showMessageDialog(mainPanel, "Error al eliminar estudiante.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel, "Error al intentar conectarse a la base de datos.",
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
