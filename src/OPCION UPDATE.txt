@@ -1,0 +1,44 @@
+public Iniciar() {
+    // ... Código existente ...
+
+    actualizarUsuarioButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String nombreActualizado = nombreActualizadoField.getText();
+            String nuevaCedula = nuevaCedulaField.getText();
+            String nuevaCiudad = nuevaCiudadField.getText();
+            String nuevaContraseña = new String(passwordField1.getPassword());
+
+            // Intentamos establecer la conexión con la base de datos.
+            try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                 PreparedStatement stmt = conn.prepareStatement("UPDATE estudiantes1 SET cedula=?, ciudad=?, contraseña=? WHERE nombre=?")) {
+
+                // Establecemos los parámetros de la consulta.
+                stmt.setString(1, nuevaCedula);
+                stmt.setString(2, nuevaCiudad);
+                stmt.setString(3, nuevaContraseña);
+                stmt.setString(4, nombreActualizado);
+
+                // Ejecutamos la consulta.
+                int rowsAffected = stmt.executeUpdate();
+
+                // Verificamos si el usuario fue actualizado correctamente.
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(Inicio, "Datos del usuario actualizados exitosamente.");
+                    nombreActualizadoField.setText(""); // Limpiamos el campo de texto del nuevo nombre.
+                    nuevaCedulaField.setText(""); // Limpiamos el campo de texto de la nueva cédula.
+                    nuevaCiudadField.setText(""); // Limpiamos el campo de texto de la nueva ciudad.
+                    passwordField1.setText(""); // Limpiamos el campo de texto de la contraseña.
+                } else {
+                    JOptionPane.showMessageDialog(Inicio, "Error al actualizar los datos del usuario.",
+                            "Error al actualizar usuario", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(Inicio, "Error al intentar conectarse a la base de datos.",
+                        "Error de conexión", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    });
+}
+
